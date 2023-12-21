@@ -3,11 +3,27 @@ import tkinter as tk
 from tkinter import filedialog
 import subprocess
 
-def crypter_rot13(decalage):
+def crypter_rot13():
     texte_a_crypter = input_text.get("1.0", "end-1c")
-    texte_crypte = string_rot13(texte_a_crypter, decalage)
-    output_text.delete("1.0", "end")
-    output_text.insert("1.0", texte_crypte)
+    dacalage = decalage_entry.get()
+    if dacalage.isdigit():
+        dacalage = int(dacalage)
+        texte_crypte = string_rot13(texte_a_crypter, dacalage)
+        output_text.delete("1.0", "end")
+        output_text.insert("1.0", texte_crypte)
+    else:
+        status_label.config(text="Veuillez entrer un décalage valide (entier).")
+
+def crypter_fichier():
+    file_path = filedialog.askopenfilename(filetypes=[("Fichiers texte", "*.txt")])
+    if file_path:
+        with open(file_path, 'r') as file:
+            content = file.read()
+        texte_crypte = string_rot13(content)
+        with open(file_path, 'w') as file:
+            file.write(texte_crypte)
+        status_label.config(text=f'Fichier "{os.path.basename(file_path)}" crypté/décrypté avec succès.')
+        subprocess.Popen(["open", file_path])
 
 def lettre_rot13(lettre, decalage):
     resultat = ""
@@ -29,14 +45,21 @@ def string_rot13(mot, decalage):
         resultat += lettre_rot13(mot[i], decalage)
     return resultat
 
+app = tk.Tk()
+app.title("CypherCrypt / Crypter NSI")
+
 
 decalage_entry = tk.Entry(app, width=10)
 decalage_entry.pack(pady=10, padx=5)
 decalage_entry.insert(0, "13")  
 
-crypter_button = tk.Button(app, text="Crypter/Décrypter", command=lambda: crypter_rot13(int(decalage_entry.get())))
-crypter_button.pack()
+input_text = tk.Text(app, height=10, width=40)
+input_text.pack(pady=10)
+output_text = tk.Text(app, height=10, width=40)
+output_text.pack(pady=10)
 
+crypter_button = tk.Button(app, text="Crypter/Décrypter", command=crypter_rot13)
+crypter_button.pack()
 crypter_fichier_button = tk.Button(app, text="Crypter/Décrypter un fichier", command=crypter_fichier)
 crypter_fichier_button.pack()
 
